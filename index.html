@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Oh, Here's a thing</title>
+    <title>Oh, Here's a thing Mobile</title>
     <style>
         :root {
             --bg: #f2f4f7;
@@ -24,15 +24,15 @@
             background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #f2f4f7 100%);
             color: var(--text-main);
             font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
-            height: 100vh; 
-            /* 适配移动端高度 */
+            height: 100vh;
+            /* 兼容移动端高度 */
             height: -webkit-fill-available;
             overflow: hidden;
             display: flex; flex-direction: column;
         }
 
         header { 
-            padding: 40px 25px 0; 
+            padding: 30px 25px 0; /* 缩小顶部内边距 */
             z-index: 10; 
             pointer-events: none;
             flex-shrink: 0;
@@ -44,9 +44,12 @@
             flex: 1;
             position: relative;
             margin: 0;
-            overflow: visible;
-            cursor: default;
+            overflow: visible; /* 允许气泡稍微超出边界 */
             z-index: 5;
+            min-height: 200px; /* 保证池子有最小高度 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* 气泡样式 */
@@ -56,7 +59,6 @@
             border-radius: 25px;
             font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -65,7 +67,7 @@
             text-align: center;
             user-select: none;
             animation: floating var(--float-duration) ease-in-out infinite;
-            max-width: 70vw; /* 防止长文本超出屏幕 */
+            max-width: 80vw;
             word-wrap: break-word;
         }
 
@@ -101,28 +103,27 @@
             100% { transform: scale(1.6); opacity: 0; filter: blur(15px); }
         }
 
-        /* 底部控制台适配 */
+        /* 底部控制台 */
         .controls {
-            padding: 15px 15px calc(15px + env(safe-area-inset-bottom));
+            padding: 15px 20px calc(25px + env(safe-area-inset-bottom));
             background: linear-gradient(to top, var(--bg) 80%, transparent);
             z-index: 100;
             flex-shrink: 0;
         }
 
-        /* 抽取按钮 - 改为网格布局适配窄屏 */
+        /* 抽取按钮 - 增加下方间距 */
         .picker-group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 25px; /* 增加与输入框的距离 */
         }
         .picker-btn {
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid rgba(0,0,0,0.03);
-            padding: 10px 0;
+            padding: 12px 0;
             border-radius: 12px;
             font-size: 11px;
-            white-space: nowrap;
             font-weight: 600;
             color: var(--text-sub);
             cursor: pointer;
@@ -137,7 +138,7 @@
             padding: 6px 6px 6px 18px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             border: 1px solid rgba(255,255,255,0.8);
         }
@@ -145,38 +146,34 @@
             flex: 1;
             border: none;
             outline: none;
-            font-size: 16px; /* 防止 iOS 自动放大 */
+            font-size: 16px;
             color: var(--text-main);
             background: transparent;
-            min-width: 0; /* 允许 input 缩小 */
+            min-width: 0;
         }
 
-        .emit-group {
-            display: flex;
-            gap: 5px;
-            flex-shrink: 0; /* 禁止色块缩小 */
-        }
+        .emit-group { display: flex; gap: 6px; flex-shrink: 0; }
         .emit-btn {
-            padding: 10px 10px;
+            padding: 10px 12px;
             border-radius: 12px;
             border: none;
             font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            white-space: nowrap;
         }
         .emit-btn.quick { background: var(--color-quick); color: var(--color-quick-text); }
         .emit-btn.focus { background: var(--color-focus); color: var(--color-focus-text); }
         .emit-btn.immerse { background: var(--color-immerse); color: var(--color-immerse-text); }
 
+        /* 修复：将文字从绝对定位改为弹性居中，防止重叠 */
         .empty-state {
-            position: absolute; top: 40%; left: 0; right: 0;
-            text-align: center; pointer-events: none;
+            pointer-events: none;
+            text-align: center;
             padding: 0 40px;
         }
         .empty-text {
-            font-size: 14px;
-            color: #ccc;
+            font-size: 15px;
+            color: #d1d1d6;
             font-weight: 400;
             line-height: 1.6;
         }
@@ -214,10 +211,10 @@
     </div>
 
     <script>
-        let things = JSON.parse(localStorage.getItem('oht_v3_mobile_data')) || [];
+        let things = JSON.parse(localStorage.getItem('oht_v3_final_data')) || [];
 
         function saveData() {
-            localStorage.setItem('oht_v3_mobile_data', JSON.stringify(things));
+            localStorage.setItem('oht_v3_final_data', JSON.stringify(things));
             render();
         }
 
@@ -234,8 +231,9 @@
                 id: Date.now(),
                 text: text,
                 vibe: vibe,
-                x: 10 + Math.random() * 65,
-                y: 10 + Math.random() * 60,
+                // 为了防止在窄屏撞车，x 轴范围稍微收窄
+                x: 15 + Math.random() * 60,
+                y: 10 + Math.random() * 65,
                 rotate: Math.floor(Math.random() * 10) - 5,
                 fx: (Math.random() * 20 - 10).toFixed(1) + 'px',
                 fy: (Math.random() * 20 - 10).toFixed(1) + 'px',
@@ -244,7 +242,7 @@
 
             things.push(newItem);
             input.value = '';
-            input.blur(); // 隐藏键盘
+            input.blur();
             haptic(15);
             clearHighlights();
             saveData();
