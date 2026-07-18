@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Oh, Here's a thing Mobile</title>
+    <title>Oh, Here's a thing</title>
     <style>
         :root {
             --bg: #f2f4f7;
@@ -19,56 +19,52 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body {
+        /* 基础自适应结构 */
+        html, body {
+            height: 100%;
+            height: 100dvh; /* 适配移动端动态高度 */
             background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #f2f4f7 100%);
             color: var(--text-main);
-            font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
-            height: 100vh;
-            /* 兼容移动端高度 */
-            height: -webkit-fill-available;
+            font-family: -apple-system, sans-serif;
             overflow: hidden;
-            display: flex; flex-direction: column;
         }
 
-        header { 
-            padding: 30px 25px 0; /* 缩小顶部内边距 */
-            z-index: 10; 
-            pointer-events: none;
-            flex-shrink: 0;
-        }
-        h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-        .subtitle { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
-
-        #pool {
-            flex: 1;
-            position: relative;
-            margin: 0;
-            overflow: visible; /* 允许气泡稍微超出边界 */
-            z-index: 5;
-            min-height: 200px; /* 保证池子有最小高度 */
+        body {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column; /* 垂直排布：头、池子、控制台 */
+        }
+
+        header {
+            padding: 30px 25px 10px;
+            flex-shrink: 0; /* 头部大小固定，不参与缩放 */
+        }
+        h1 { font-size: 24px; font-weight: 700; }
+        .subtitle { font-size: 13px; color: var(--text-sub); }
+
+        /* 中间池子：核心自适应区域 */
+        #pool {
+            flex: 1; /* 自动撑开，占据屏幕剩下的所有空间 */
+            position: relative;
+            margin: 0 10px;
+            z-index: 5;
+            overflow: visible;
         }
 
         /* 气泡样式 */
         .thing {
             position: absolute;
-            padding: 12px 20px;
+            padding: 12px 18px;
             border-radius: 25px;
             font-size: 14px;
             font-weight: 600;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
-            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
             text-align: center;
             user-select: none;
             animation: floating var(--float-duration) ease-in-out infinite;
             max-width: 80vw;
-            word-wrap: break-word;
         }
 
         @keyframes floating {
@@ -76,114 +72,99 @@
             50% { transform: translate(var(--float-x), var(--float-y)) rotate(calc(var(--base-rotate) + 2deg)); }
         }
 
-        .vibe-quick { background: var(--color-quick); color: var(--color-quick-text); min-width: 80px; }
-        .vibe-focus { background: var(--color-focus); color: var(--color-focus-text); min-width: 100px; }
-        .vibe-immerse { background: var(--color-immerse); color: var(--color-immerse-text); min-width: 130px; padding: 18px 28px; }
+        .vibe-quick { background: var(--color-quick); color: var(--color-quick-text); }
+        .vibe-focus { background: var(--color-focus); color: var(--color-focus-text); }
+        .vibe-immerse { background: var(--color-immerse); color: var(--color-immerse-text); }
 
+        /* 选中态 */
         .thing.highlight {
             animation: jump 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate !important;
             z-index: 1000 !important;
-            box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(255,255,255,0.8);
             border: 2px solid white;
         }
+        @keyframes jump { 0% { transform: translateY(0) scale(1.1); } 100% { transform: translateY(-15px) scale(1.15); } }
 
-        @keyframes jump {
-            0% { transform: translateY(0) scale(1.1); }
-            100% { transform: translateY(-20px) scale(1.15); }
-        }
+        /* 爆炸 */
+        .thing.popping { animation: explode 0.4s ease-out forwards !important; }
+        @keyframes explode { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; filter: blur(15px); } }
 
-        .thing.popping {
-            animation: explode 0.4s ease-out forwards !important;
-            pointer-events: none;
-        }
-
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 1; filter: blur(0px); }
-            30% { transform: scale(0.85); opacity: 1; }
-            100% { transform: scale(1.6); opacity: 0; filter: blur(15px); }
-        }
-
-        /* 底部控制台 */
+        /* 底部控制台：始终贴底，高度自适应内容 */
         .controls {
-            padding: 15px 20px calc(25px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, var(--bg) 80%, transparent);
-            z-index: 100;
+            padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, var(--bg) 90%, transparent);
             flex-shrink: 0;
+            z-index: 100;
         }
 
-        /* 抽取按钮 - 增加下方间距 */
+        /* 抽取按钮：网格自适应 */
         .picker-group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 25px; /* 增加与输入框的距离 */
+            gap: 8px;
+            margin-bottom: 15px;
         }
         .picker-btn {
-            background: rgba(255, 255, 255, 0.8);
+            background: white;
             border: 1px solid rgba(0,0,0,0.03);
-            padding: 12px 0;
+            padding: 10px 0;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-sub);
-            cursor: pointer;
             text-align: center;
         }
-        .picker-btn.primary { background: var(--text-main); color: white; border: none; }
+        .picker-btn.primary { background: var(--text-main); color: white; }
 
-        /* 输入条适配 */
+        /* 输入条：精简文案适配手机 */
         .input-bar {
             background: #fff;
-            border-radius: 20px;
-            padding: 6px 6px 6px 18px;
+            border-radius: 18px;
+            padding: 5px 5px 5px 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.8);
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         input {
             flex: 1;
             border: none;
             outline: none;
-            font-size: 16px;
+            font-size: 16px; /* 防止缩放 */
             color: var(--text-main);
             background: transparent;
             min-width: 0;
         }
 
-        .emit-group { display: flex; gap: 6px; flex-shrink: 0; }
+        .emit-group { display: flex; gap: 4px; }
         .emit-btn {
-            padding: 10px 12px;
+            padding: 10px 11px;
             border-radius: 12px;
             border: none;
             font-size: 11px;
             font-weight: 700;
-            cursor: pointer;
         }
         .emit-btn.quick { background: var(--color-quick); color: var(--color-quick-text); }
         .emit-btn.focus { background: var(--color-focus); color: var(--color-focus-text); }
         .emit-btn.immerse { background: var(--color-immerse); color: var(--color-immerse-text); }
 
-        /* 修复：将文字从绝对定位改为弹性居中，防止重叠 */
+        /* 居中提示语 */
         .empty-state {
-            pointer-events: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            padding: 0 40px;
+            width: 80%;
+            pointer-events: none;
         }
-        .empty-text {
-            font-size: 15px;
-            color: #d1d1d6;
-            font-weight: 400;
-            line-height: 1.6;
-        }
+        .empty-text { font-size: 14px; color: #d1d1d6; }
     </style>
 </head>
-<body onclick="handleGlobalClick(event)">
+<body onclick="clearHighlights()">
 
     <header>
         <h1>Oh, Here's a thing...</h1>
-        <p class="subtitle">Catch the thoughts, release the mind.</p>
+        <p class="subtitle">记录碎片，随机开启。</p>
     </header>
 
     <div id="pool">
@@ -196,12 +177,13 @@
         <div class="picker-group">
             <button class="picker-btn" onclick="pickRandom('quick')">5分碎片</button>
             <button class="picker-btn" onclick="pickRandom('focus')">专注半时</button>
-            <button class="picker-btn" onclick="pickRandom('immerse')">沉浸任务</button>
+            <button class="picker-btn" onclick="pickRandom('immerse')">沉浸大任</button>
             <button class="picker-btn primary" onclick="pickRandom('any')">随机开启</button>
         </div>
 
         <div class="input-bar">
-            <input type="text" id="new-thing" placeholder="Something on your mind?" onkeypress="if(event.key==='Enter') addThing('quick')">
+            <!-- 缩短了 placeholder -->
+            <input type="text" id="new-thing" placeholder="捕捉想法..." onkeypress="if(event.key==='Enter') addThing('quick')">
             <div class="emit-group">
                 <button class="emit-btn quick" onclick="addThing('quick')">轻量</button>
                 <button class="emit-btn focus" onclick="addThing('focus')">专注</button>
@@ -211,10 +193,10 @@
     </div>
 
     <script>
-        let things = JSON.parse(localStorage.getItem('oht_v3_final_data')) || [];
+        let things = JSON.parse(localStorage.getItem('oht_v5_adaptive')) || [];
 
         function saveData() {
-            localStorage.setItem('oht_v3_final_data', JSON.stringify(things));
+            localStorage.setItem('oht_v5_adaptive', JSON.stringify(things));
             render();
         }
 
@@ -227,22 +209,21 @@
             const text = input.value.trim();
             if (!text) return;
 
-            const newItem = {
+            things.push({
                 id: Date.now(),
                 text: text,
                 vibe: vibe,
-                // 为了防止在窄屏撞车，x 轴范围稍微收窄
-                x: 15 + Math.random() * 60,
-                y: 10 + Math.random() * 65,
+                // 使用百分比位置，它们会在自动撑开的 #pool 内部随机
+                x: 10 + Math.random() * 70,
+                y: 10 + Math.random() * 80, 
                 rotate: Math.floor(Math.random() * 10) - 5,
                 fx: (Math.random() * 20 - 10).toFixed(1) + 'px',
                 fy: (Math.random() * 20 - 10).toFixed(1) + 'px',
                 duration: (4 + Math.random() * 4).toFixed(1) + 's'
-            };
+            });
 
-            things.push(newItem);
             input.value = '';
-            input.blur();
+            input.blur(); 
             haptic(15);
             clearHighlights();
             saveData();
@@ -262,34 +243,22 @@
             document.querySelectorAll('.thing').forEach(el => el.classList.remove('highlight'));
         }
 
-        function handleGlobalClick(e) {
-            clearHighlights();
-        }
-
         function pickRandom(filter) {
             const poolItems = document.querySelectorAll('.thing');
             if(poolItems.length === 0) return;
-
             let targets = Array.from(poolItems);
-            if(filter !== 'any') {
-                targets = targets.filter(el => el.dataset.vibe === filter);
-            }
-
+            if(filter !== 'any') targets = targets.filter(el => el.dataset.vibe === filter);
             if(targets.length === 0) return;
 
             haptic(20);
             clearHighlights();
-
             const luckyOne = targets[Math.floor(Math.random() * targets.length)];
-            
-            luckyOne.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => luckyOne.classList.add('highlight'), 100);
+            luckyOne.classList.add('highlight');
         }
 
         function render() {
             const pool = document.getElementById('pool');
             const hint = document.getElementById('empty-hint');
-            
             pool.querySelectorAll('.thing').forEach(ot => pool.removeChild(ot));
 
             things.forEach(t => {
@@ -297,7 +266,6 @@
                 div.className = `thing vibe-${t.vibe}`;
                 div.dataset.vibe = t.vibe;
                 div.innerText = t.text;
-                
                 div.style.left = `${t.x}%`;
                 div.style.top = `${t.y}%`;
                 div.style.setProperty('--base-rotate', `${t.rotate}deg`);
@@ -305,14 +273,11 @@
                 div.style.setProperty('--float-y', t.fy);
                 div.style.setProperty('--float-duration', t.duration);
                 div.style.zIndex = Math.floor(t.y);
-
                 div.onclick = (e) => popThing(t.id, div, e);
                 pool.appendChild(div);
             });
-
             hint.style.display = things.length === 0 ? 'block' : 'none';
         }
-
         render();
     </script>
 </body>
